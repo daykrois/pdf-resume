@@ -1,32 +1,54 @@
 <script setup>
-import jsPDF from 'jspdf'
+import * as htmlToImage from 'html-to-image';
+import jsPDF from 'jspdf';
 
-const downloadPdf = () => {
-    // 确保我们有 DOM 元素来转换
-    const resume = document.getElementById('pdf');
-    // 创建新的 jsPDF 实例
-    const doc = new jsPDF();
-    const margins = {
-        top: 60,
-        bottom: 60,
-        left: 40,
-        right: 40,
-    };
-    doc.setFont("helvetica");
-    // 使用 html 方法转换 DOM 元素为 PDF
-    doc.html(resume, margins, {
-        callback: function(pdf) {
-            // 保存 PDF 文件
-            pdf.save('resume.pdf');
-        },
-        windowWidth: 800,
-        windowHeight: 600,
-    });
+function resumeToPDF(){
+    const resume = document.getElementById('resume');
+    htmlToImage.toCanvas(resume).then(function (canvas) {
+          // document.body.appendChild(canvas);
+          var contentWidth = canvas.width;
+          var contentHeight = canvas.height;
+
+          //一页pdf显示html页面生成的canvas高度;
+          var pageHeight = contentWidth / 592.28 * 841.89;
+          //未生成pdf的html页面高度
+          var leftHeight = contentHeight;
+          //页面偏移
+          var position = 0;
+          //a4纸的尺寸[595.28,841.89]，html页面生成的canvas在pdf中图片的宽高
+          var imgWidth = 595.28;
+          var imgHeight = 592.28 / contentWidth * contentHeight;
+
+          var pageData = canvas.toDataURL('image/jpeg', 1.0);
+
+          var pdf = new jsPDF('', 'pt', 'a4');
+
+          //有两个高度需要区分，一个是html页面的实际高度，和生成pdf的页面高度(841.89)
+          //当内容未超过pdf一页显示的范围，无需分页
+          if (leftHeight < pageHeight) {
+            console.log(imgWidth, imgHeight, 'imgWidth, imgHeight')
+            pdf.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight);
+          } else {
+            while (leftHeight > 0) {
+              pdf.addImage(pageData, 'JPEG', 0, position, imgWidth, imgHeight)
+              leftHeight -= pageHeight;
+              position -= 841.89;
+              //避免添加空白页
+              if (leftHeight > 0) {
+                pdf.addPage();
+              }
+            }
+          }
+          pdf.save(`resume.pdf`);
+        }).catch((err) => {
+          console.log(err)
+        //   message.warning("导出PDF失败")
+        });
 }
 </script>
 
 <template>
-    <div id="pdf">
+    <div id="resume">
         <div class="container">
             <h1>个人简历</h1>
 
@@ -71,7 +93,7 @@ const downloadPdf = () => {
         </div>
     </div>
 
-    <button @click="downloadPdf()">下载截图</button>
+    <button @click="resumeToPDF()">下载pdf</button>
 
 </template>
 

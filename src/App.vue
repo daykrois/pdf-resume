@@ -1,7 +1,7 @@
 <script setup>
 // import HelloWorld from './components/HelloWorld.vue'
 // import TheWelcome from './components/TheWelcome.vue'
-import HTMLToPDF from './components/HTMLToPDF.vue'
+import HtmlToImageDemo from './components/HtmlToImageDemo.vue'
 // import HTMLToCanvas from './components/HTMLToCanvas.vue'
 </script>
 
@@ -16,7 +16,7 @@ import HTMLToPDF from './components/HTMLToPDF.vue'
 
   <main>
     <!-- <TheWelcome /> -->
-    <HTMLToPDF />
+    <HtmlToImageDemo />
   </main>
 </template>
 
